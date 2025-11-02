@@ -9,8 +9,8 @@ return {
 		"WhoIsSethDaniel/mason-tool-installer.nvim",
 		-- Useful status updates for LSP.
 		{ "j-hui/fidget.nvim", opts = {} },
-		-- Allows extra capabilities provided by nvim-cmp
-		"hrsh7th/cmp-nvim-lsp",
+		-- Allows extra capabilities provided by blink cmp
+		"saghen/blink.cmp",
 	},
 	config = function()
 		--  This function gets run when an LSP attaches to a particular buffer.
@@ -63,11 +63,7 @@ return {
 				---@param bufnr? integer some lsp support methods only in specific files
 				---@return boolean
 				local function client_supports_method(client, method, bufnr)
-					if vim.fn.has("nvim-0.11") == 1 then
-						return client:supports_method(method, bufnr)
-					else
-						return client.supports_method(method, { bufnr = bufnr })
-					end
+					return client:supports_method(method, bufnr)
 				end
 
 				-- The following two autocommands are used to highlight references of the
@@ -144,8 +140,7 @@ return {
 			},
 		})
 
-		local capabilities = vim.lsp.protocol.make_client_capabilities()
-		capabilities = vim.tbl_deep_extend("force", capabilities, require("cmp_nvim_lsp").default_capabilities())
+		local capabilities = require("blink.cmp").get_lsp_capabilities({})
 
 		-- Enable the following language servers
 		local servers = {
@@ -190,7 +185,7 @@ return {
 					-- by the server configuration above. Useful when disabling
 					-- certain features of an LSP (for example, turning off formatting for ts_ls)
 					server.capabilities = vim.tbl_deep_extend("force", {}, capabilities, server.capabilities or {})
-					require("lspconfig")[server_name].setup(server)
+					vim.lsp.config(server_name, server)
 				end,
 			},
 		})
